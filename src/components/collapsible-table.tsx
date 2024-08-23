@@ -59,7 +59,7 @@ const CollapsibleTable = ({
                     </CollapsibleTrigger>
                     <CollapsibleContent asChild>
                       <>
-                        {rows.map((row, index) => (
+                        {rows.map((row: any, index: number) => (
                           <TableRow key={index}>
                             {headers.map((header) => (
                               <TableCell

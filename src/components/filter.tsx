@@ -29,7 +29,7 @@ const Filter = ({ filters, headers, setFilters }: FilterProps) => {
     ]);
   };
 
-  const updateFilter = (index: number, field: string, value: string) => {
+  const updateFilter = (index: number, field: keyof Filter, value: string) => {
     const newFilters = [...filters] as Filter[];
     newFilters[index][field] = value;
     setFilters(newFilters);

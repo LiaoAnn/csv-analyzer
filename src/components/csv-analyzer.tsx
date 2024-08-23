@@ -1,16 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import Papa from "papaparse";
 import { BarChart2, Table as TableIcon } from "lucide-react";
 import Filter from "./filter";
@@ -21,38 +11,37 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 
 export default function CSVAnalyzer() {
   const [data, setData] = useState([]);
-  const [headers, setHeaders] = useState([]);
+  const [headers, setHeaders] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [showChart, setShowChart] = useState(false);
-  const [filters, setFilters] = useState([]);
-  const [groupBy, setGroupBy] = useState([]);
+  const [filters, setFilters] = useState<Filter[]>([]);
+  const [groupBy, setGroupBy] = useState<string[]>([]);
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      Papa.parse(file, {
-        complete: (result) => {
-          if (result.data && result.data.length > 0) {
-            setData(result.data);
-            setHeaders(result.meta.fields || []);
-            setError("");
-          } else {
-            setError("No data found in the CSV file");
-          }
-        },
-        header: true,
-        dynamicTyping: true,
-        error: (error) => {
-          setError("Error parsing CSV: " + error.message);
-        },
-      });
-    }
+  const handleFileUpload = (event: ChangeEvent) => {
+    const file = (event.target as HTMLInputElement)?.files?.[0];
+    if (!file) return;
+    Papa.parse(file, {
+      complete: (result) => {
+        if (result.data && result.data.length > 0) {
+          setData(result.data as never[]);
+          setHeaders((result.meta.fields as never) || []);
+          setError("");
+        } else {
+          setError("No data found in the CSV file");
+        }
+      },
+      header: true,
+      dynamicTyping: true,
+      error: (error) => {
+        setError("Error parsing CSV: " + error.message);
+      },
+    });
   };
 
   const filteredAndGroupedData = useMemo(() => {
     // apply filters
-    let result = data.filter((row) => {
-      return filters.every((filter) => {
+    let result: any = data.filter((row) => {
+      return filters.every((filter: Filter) => {
         const value = row[filter.column];
         switch (filter.condition) {
           case "equals":
@@ -77,9 +66,9 @@ export default function CSVAnalyzer() {
 
     // Then, apply grouping if a groupBy property is set
     if (groupBy.length > 0) {
-      const groups = {};
+      const groups: Record<string, any> = {};
 
-      result.forEach((row) => {
+      result.forEach((row: any) => {
         // generate a key for the group
         const key = groupBy.map((field) => String(row[field])).join(", ");
 
@@ -95,38 +84,13 @@ export default function CSVAnalyzer() {
         .reduce((acc, [key, value]) => {
           acc[key] = value;
           return acc;
-        }, {});
+        }, {} as Record<string, any>);
 
       // return the grouped data
       result = sortedGroups;
     }
     return result;
   }, [data, filters, groupBy, headers]);
-
-  const renderChart = () => (
-    <div className="border rounded-md p-4 h-[600px]">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={filteredAndGroupedData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={groupBy !== "none" ? groupBy : headers[0]} />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          {headers
-            .filter(
-              (header) => header !== (groupBy !== "none" ? groupBy : null)
-            )
-            .map((key, index) => (
-              <Bar
-                key={key}
-                dataKey={key}
-                fill={`hsl(${index * 30}, 70%, 50%)`}
-              />
-            ))}
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 space-y-4">
