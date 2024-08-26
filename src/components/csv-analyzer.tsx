@@ -8,18 +8,29 @@ import GroupBy from "./groupby";
 import CollapsibleTable from "./collapsible-table";
 import { AnalysisChart } from "./analysis-chart";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { clearFilters, setFileName } from "@/lib/features/filter";
 
 export default function CSVAnalyzer() {
+  const dispatch = useAppDispatch();
+  const filters = useAppSelector((state) => state.filter.filters);
+  const fileName = useAppSelector((state) => state.filter.fileName);
+
   const [data, setData] = useState([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [showChart, setShowChart] = useState(false);
-  const [filters, setFilters] = useState<Filter[]>([]);
   const [groupBy, setGroupBy] = useState<string[]>([]);
 
   const handleFileUpload = (event: ChangeEvent) => {
     const file = (event.target as HTMLInputElement)?.files?.[0];
     if (!file) return;
+
+    if (fileName !== file.name) {
+      dispatch(clearFilters());
+      dispatch(setFileName(file.name));
+    }
+
     Papa.parse(file, {
       complete: (result) => {
         if (result.data && result.data.length > 0) {
@@ -130,7 +141,7 @@ export default function CSVAnalyzer() {
               setGroupBy={setGroupBy}
             />
           </div>
-          <Filter filters={filters} headers={headers} setFilters={setFilters} />
+          <Filter filters={filters} headers={headers} />
           <h2 className="text-2xl font-bold">Data Visualization</h2>
           {showChart ? (
             groupBy.length > 0 ? (

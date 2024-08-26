@@ -8,35 +8,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X } from "lucide-react";
-
-type Filter = {
-  column: string;
-  condition: string;
-  value: string;
-};
+import type { Filter } from "@/lib/features/filter";
+import { useAppDispatch } from "@/lib/hooks";
+import { addFilter, removeFilter, updateFilter } from "@/lib/features/filter";
 
 type FilterProps = {
   filters: Filter[];
   headers: string[];
-  setFilters: (filters: Filter[]) => void;
 };
 
-const Filter = ({ filters, headers, setFilters }: FilterProps) => {
-  const addFilter = () => {
-    setFilters([
-      ...filters,
-      { column: headers[0], condition: "equals", value: "" },
-    ]);
+const Filter = ({ filters, headers }: FilterProps) => {
+  const dispatch = useAppDispatch();
+
+  const _addFilter = () => {
+    dispatch(addFilter({ column: headers[0], condition: "equals", value: "" }));
   };
 
-  const updateFilter = (index: number, field: keyof Filter, value: string) => {
-    const newFilters = [...filters] as Filter[];
-    newFilters[index][field] = value;
-    setFilters(newFilters);
+  const _updateFilter = (index: number, field: keyof Filter, value: string) => {
+    const newFilter = { ...filters[index] };
+    newFilter[field] = value;
+    dispatch(updateFilter({ index, filter: newFilter }));
   };
 
-  const removeFilter = (index: number) => {
-    setFilters(filters.filter((_, i) => i !== index));
+  const _removeFilter = (index: number) => {
+    dispatch(removeFilter(index));
   };
   return (
     <div className="space-y-2">
@@ -44,7 +39,7 @@ const Filter = ({ filters, headers, setFilters }: FilterProps) => {
         <div key={index} className="flex items-center space-x-2">
           <Select
             value={filter.column}
-            onValueChange={(value) => updateFilter(index, "column", value)}
+            onValueChange={(value) => _updateFilter(index, "column", value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select column" />
@@ -59,7 +54,7 @@ const Filter = ({ filters, headers, setFilters }: FilterProps) => {
           </Select>
           <Select
             value={filter.condition}
-            onValueChange={(value) => updateFilter(index, "condition", value)}
+            onValueChange={(value) => _updateFilter(index, "condition", value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select condition" />
@@ -74,20 +69,20 @@ const Filter = ({ filters, headers, setFilters }: FilterProps) => {
           <Input
             type="text"
             value={filter.value}
-            onChange={(e) => updateFilter(index, "value", e.target.value)}
+            onChange={(e) => _updateFilter(index, "value", e.target.value)}
             placeholder="Filter value"
             className="w-[180px]"
           />
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => removeFilter(index)}
+            onClick={() => _removeFilter(index)}
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
       ))}
-      <Button onClick={addFilter} variant="outline" size="sm">
+      <Button onClick={_addFilter} variant="outline" size="sm">
         <Plus className="h-4 w-4 mr-2" /> Add Filter
       </Button>
     </div>
