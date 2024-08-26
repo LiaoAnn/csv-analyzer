@@ -86,7 +86,9 @@ export default function CSVAnalyzer() {
 
       result.forEach((row: any) => {
         // generate a key for the group
-        const key = groupBy.map((field) => String(row[field])).join(", ");
+        const key = groupBy
+          .map((field: string) => String(row[field]))
+          .join(", ");
 
         if (!groups[key]) {
           groups[key] = [];
