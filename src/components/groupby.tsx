@@ -1,3 +1,4 @@
+import { useAppDispatch } from "@/lib/hooks";
 import { Label } from "./ui/label";
 import {
   MultiSelector,
@@ -7,20 +8,26 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from "@/components/ui/multi-select";
+import { setGroupBy } from "@/lib/features/groupBy";
 
 type GroupByProps = {
   headers: string[];
   groupBy: string[];
-  setGroupBy: (groupBy: string[]) => void;
 };
 
-const GroupBy = ({ headers, groupBy, setGroupBy }: GroupByProps) => {
+const GroupBy = ({ headers, groupBy }: GroupByProps) => {
+  const dispatch = useAppDispatch();
+
+  const _setGroupBy = (groupBy: string[]) => {
+    dispatch(setGroupBy(groupBy));
+  };
+
   return (
     <div className="flex items-center space-x-2">
       <Label htmlFor="group-by">Group By:</Label>
       <MultiSelector
         values={groupBy}
-        onValuesChange={setGroupBy}
+        onValuesChange={_setGroupBy}
         loop
         className="max-w-xs"
       >
