@@ -10,8 +10,20 @@ import {
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 
+import filter from './features/filter';
+
+const filterPersistConfig = {
+  key: 'filter',
+  storage,
+  whitelist: ['filters', 'fileName'],
+};
+
 export const store = configureStore({
   reducer: {
+    filter: persistReducer(
+      filterPersistConfig,
+      filter
+    ),
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
