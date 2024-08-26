@@ -11,11 +11,17 @@ import {
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 
 import filter from './features/filter';
+import groupBy from './features/groupBy';
 
 const filterPersistConfig = {
   key: 'filter',
   storage,
   whitelist: ['filters', 'fileName'],
+};
+const groupByPersistConfig = {
+  key: 'groupBy',
+  storage,
+  whitelist: ['list', 'fileName'],
 };
 
 export const store = configureStore({
@@ -23,6 +29,10 @@ export const store = configureStore({
     filter: persistReducer(
       filterPersistConfig,
       filter
+    ),
+    groupBy: persistReducer(
+      groupByPersistConfig,
+      groupBy
     ),
   },
   middleware: (getDefaultMiddleware) =>
